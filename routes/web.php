@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MessageController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,3 +16,4 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
+Route::get('/messages', [MessageController::class, 'index'])->name('messages');
