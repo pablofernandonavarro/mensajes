@@ -50,14 +50,19 @@ jobs:
             **/storage/framework/sessions/**
             **/storage/framework/views/**
 
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
       - name: Run deployment commands via SSH
-        run: |
-          sudo apt-get update && sudo apt-get install -y sshpass
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
-            cd /home/$USER/domains/tusturnos.online/mensajes
-            composer install --no-dev --optimize-autoloader
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            php artisan migrate --force
-          ENDSSH
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: >-
+          sshpass -e ssh -o StrictHostKeyChecking=no
+          -p ${{ secrets.SSH_PORT }}
+          ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
+          "cd /home/\$USER/domains/tusturnos.online/mensajes &&
+          composer install --no-dev --optimize-autoloader &&
+          php artisan config:cache &&
+          php artisan route:cache &&
+          php artisan view:cache &&
+          php artisan migrate --force"
