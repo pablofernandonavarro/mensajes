@@ -44,17 +44,17 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          echo "Contenido de deploy_key (primeros 30 chars):"
-          head -c 30 ~/.ssh/deploy_key
-          echo ""
           echo "Lineas en deploy_key: $(wc -l < ~/.ssh/deploy_key)"
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          echo "Ultima linea: $(tail -1 ~/.ssh/deploy_key)"
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>&1 || echo "ssh-keyscan fallo, usando StrictHostKeyChecking=no como fallback"
 
       - name: Test SSH connection
         run: |
           ssh -i ~/.ssh/deploy_key \
             -p ${{ secrets.SSH_PORT }} \
             -o ConnectTimeout=10 \
+            -o StrictHostKeyChecking=no \
+            -vvv \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
             "echo 'SSH connection OK'"
 
