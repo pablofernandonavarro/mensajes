@@ -37,7 +37,24 @@ jobs:
           echo "SSH_USERNAME esta configurado: ${{ secrets.SSH_USERNAME != '' }}"
           echo "SSH_PORT esta configurado: ${{ secrets.SSH_PORT != '' }}"
           echo "SSH_KEY esta configurado: ${{ secrets.SSH_KEY != '' }}"
-          echo "SSH_PORT valor: [${{ secrets.SSH_PORT }}]"
+
+      - name: Test DNS resolution
+        run: |
+          echo "=== nslookup ==="
+          nslookup ${{ secrets.SSH_HOST }} || echo "nslookup fallo"
+          echo ""
+          echo "=== ping (3 intentos) ==="
+          ping -c 3 -W 5 ${{ secrets.SSH_HOST }} || echo "ping fallo"
+
+      - name: Test network connectivity
+        run: |
+          echo "Probando puerto ${{ secrets.SSH_PORT }}..."
+          timeout 5 bash -c "</dev/tcp/${{ secrets.SSH_HOST }}/${{ secrets.SSH_PORT }}" && echo "Puerto ABIERTO" || echo "Puerto CERRADO o inaccesible"
+          echo ""
+          echo "Probando puertos SSH comunes..."
+          for port in 22 2222 8022 7822; do
+            timeout 3 bash -c "</dev/tcp/${{ secrets.SSH_HOST }}/$port" 2>/dev/null && echo "Puerto $port: ABIERTO" || echo "Puerto $port: cerrado"
+          done
 
       - name: Setup SSH key
         run: |
