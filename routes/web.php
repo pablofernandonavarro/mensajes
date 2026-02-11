@@ -15,5 +15,5 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages');
 });
-Route::get('/messages', [MessageController::class, 'index'])->name('messages');
