@@ -36,30 +36,42 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        # Si ssh-keyscan falla, el step falla y te avisa
 
-      - name: Deploy files via rsync over SSH
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
+      - name: Test SSH connection
         run: |
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p $SSH_PORT" \
+          ssh -i ~/.ssh/deploy_key \
+            -p ${{ secrets.SSH_PORT }} \
+            -o ConnectTimeout=10 \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+            "echo 'SSH connection OK'"
+
+      - name: Deploy files via rsync
+        run: |
+          rsync -avz \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
             --exclude='.git' \
+            --exclude='.github' \
             --exclude='node_modules' \
+            --exclude='vendor' \
             --exclude='tests' \
             --exclude='.env' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
             --exclude='storage/framework/sessions/*' \
             --exclude='storage/framework/views/*' \
-            ./ "$SSH_USERNAME@$SSH_HOST:/home/$SSH_USERNAME/domains/tusturnos.online/mensajes/"
+            --exclude='storage/app/*' \
+            ./ "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USERNAME }}/domains/tusturnos.online/mensajes/"
 
-      - name: Run deployment commands via SSH
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
+      - name: Run deployment commands
         run: |
-          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" "cd /home/\$USER/domains/tusturnos.online/mensajes && composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force"
+          ssh -i ~/.ssh/deploy_key \
+            -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+            'cd /home/${{ secrets.SSH_USERNAME }}/domains/tusturnos.online/mensajes && \
+            composer install --no-dev --optimize-autoloader && \
+            php artisan migrate --force && \
+            php artisan config:cache && \
+            php artisan route:cache && \
+            php artisan view:cache'
