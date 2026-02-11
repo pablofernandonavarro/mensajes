@@ -31,39 +31,12 @@ jobs:
           VITE_REVERB_PORT: ${{ secrets.VITE_REVERB_PORT }}
           VITE_REVERB_SCHEME: ${{ secrets.VITE_REVERB_SCHEME }}
 
-      - name: Debug - Verificar secrets
-        run: |
-          echo "SSH_HOST esta configurado: ${{ secrets.SSH_HOST != '' }}"
-          echo "SSH_USERNAME esta configurado: ${{ secrets.SSH_USERNAME != '' }}"
-          echo "SSH_PORT esta configurado: ${{ secrets.SSH_PORT != '' }}"
-          echo "SSH_KEY esta configurado: ${{ secrets.SSH_KEY != '' }}"
-
-      - name: Test DNS resolution
-        run: |
-          echo "=== nslookup ==="
-          nslookup ${{ secrets.SSH_HOST }} || echo "nslookup fallo"
-          echo ""
-          echo "=== ping (3 intentos) ==="
-          ping -c 3 -W 5 ${{ secrets.SSH_HOST }} || echo "ping fallo"
-
-      - name: Test network connectivity
-        run: |
-          echo "Probando puerto ${{ secrets.SSH_PORT }}..."
-          timeout 5 bash -c "</dev/tcp/${{ secrets.SSH_HOST }}/${{ secrets.SSH_PORT }}" && echo "Puerto ABIERTO" || echo "Puerto CERRADO o inaccesible"
-          echo ""
-          echo "Probando puertos SSH comunes..."
-          for port in 22 2222 8022 7822; do
-            timeout 3 bash -c "</dev/tcp/${{ secrets.SSH_HOST }}/$port" 2>/dev/null && echo "Puerto $port: ABIERTO" || echo "Puerto $port: cerrado"
-          done
-
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          echo "Lineas en deploy_key: $(wc -l < ~/.ssh/deploy_key)"
-          echo "Ultima linea: $(tail -1 ~/.ssh/deploy_key)"
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>&1 || echo "ssh-keyscan fallo, usando StrictHostKeyChecking=no como fallback"
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>&1 || true
 
       - name: Test SSH connection
         run: |
@@ -71,7 +44,6 @@ jobs:
             -p ${{ secrets.SSH_PORT }} \
             -o ConnectTimeout=10 \
             -o StrictHostKeyChecking=no \
-            -vvv \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
             "echo 'SSH connection OK'"
 
@@ -98,7 +70,7 @@ jobs:
             -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
             'cd /home/${{ secrets.SSH_USERNAME }}/domains/tusturnos.online/mensajes && \
-            composer install --no-dev --optimize-autoloader && \
+            composer2 install --no-dev --optimize-autoloader && \
             php artisan migrate --force && \
             php artisan config:cache && \
             php artisan route:cache && \
