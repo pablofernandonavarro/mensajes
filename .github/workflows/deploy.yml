@@ -31,13 +31,24 @@ jobs:
           VITE_REVERB_PORT: ${{ secrets.VITE_REVERB_PORT }}
           VITE_REVERB_SCHEME: ${{ secrets.VITE_REVERB_SCHEME }}
 
+      - name: Debug - Verificar secrets
+        run: |
+          echo "SSH_HOST esta configurado: ${{ secrets.SSH_HOST != '' }}"
+          echo "SSH_USERNAME esta configurado: ${{ secrets.SSH_USERNAME != '' }}"
+          echo "SSH_PORT esta configurado: ${{ secrets.SSH_PORT != '' }}"
+          echo "SSH_KEY esta configurado: ${{ secrets.SSH_KEY != '' }}"
+          echo "SSH_PORT valor: [${{ secrets.SSH_PORT }}]"
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          echo "Contenido de deploy_key (primeros 30 chars):"
+          head -c 30 ~/.ssh/deploy_key
+          echo ""
+          echo "Lineas en deploy_key: $(wc -l < ~/.ssh/deploy_key)"
           ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-        # Si ssh-keyscan falla, el step falla y te avisa
 
       - name: Test SSH connection
         run: |
