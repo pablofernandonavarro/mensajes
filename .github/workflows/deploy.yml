@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+ 
 
 jobs:
   deploy:
@@ -70,7 +70,7 @@ jobs:
             -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
             'cd /home/${{ secrets.SSH_USERNAME }}/domains/tusturnos.online/mensajes && \
-            composer2 install --no-dev --optimize-autoloader && \
+            composer2 install --no-dev --optimize-autoloader --ignore-platform-reqs && \
             php artisan migrate --force && \
             php artisan config:cache && \
             php artisan route:cache && \
