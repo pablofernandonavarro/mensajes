@@ -34,8 +34,8 @@ class ManageMessages extends Component
             'content' => $this->content ?: 'Archivo adjunto',
         ];
 
-        // Solo agregar campos de archivo si las columnas existen (después de migración)
-        if ($this->file && \Schema::hasColumn('messages', 'file_path')) {
+        // Guardar archivo si existe
+        if ($this->file) {
             $data['file_path'] = $this->file->store('chat-files', 'public');
             $data['file_name'] = $this->file->getClientOriginalName();
             $data['file_type'] = $this->file->getClientOriginalExtension();
@@ -43,6 +43,9 @@ class ManageMessages extends Component
 
         Message::create($data);
 
+        // Limpiar variables
+        $this->content = '';
+        $this->file = null;
         $this->reset(['content', 'file']);
 
         // Disparar evento para hacer scroll
