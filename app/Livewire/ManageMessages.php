@@ -29,14 +29,9 @@ class ManageMessages extends Component
 
         $this->reset('content');
 
-        // Paso 2: Disparar el evento para que Reverb lo envíe a todos los navegadores
-        broadcast(new MessageSend());
+        // Ya no necesitamos broadcast con polling
+        // broadcast(new MessageSend());
     }
-
-    // Paso 4: Cuando Echo recibe el evento del WebSocket, este método se ejecuta
-    // y fuerza un re-render del componente (recarga los mensajes de la BD)
-    #[On('echo:chat,MessageSend')]
-   
 
     public function formatWhatsAppDate(Carbon $date): string
     {

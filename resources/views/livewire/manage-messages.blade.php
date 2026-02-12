@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="p-4" wire:poll.3s>
     {{-- Lista de mensajes --}}
     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-4 h-96 overflow-y-auto" id="chat-box">
         @forelse($messages as $message)
