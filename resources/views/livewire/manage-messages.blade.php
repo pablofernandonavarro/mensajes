@@ -75,35 +75,42 @@
                     @if($isImage)
                         {{-- Vista previa de imagen --}}
                         <div class="mb-2 bg-white rounded-lg overflow-hidden">
-                            <img src="{{ $file->temporaryUrl() }}" alt="Preview" class="w-full h-auto max-h-64 object-contain">
+                            @try
+                                <img src="{{ $file->temporaryUrl() }}" alt="Preview" class="w-full h-auto max-h-64 object-contain">
+                            @catch(\Exception $e)
+                                <div class="p-4 text-center">
+                                    <p class="text-sm text-gray-600">No se puede previsualizar</p>
+                                </div>
+                            @endtry
                         </div>
-                        <div class="flex items-center justify-between mb-1">
-                            <p class="text-xs text-indigo-100">{{ $file->getClientOriginalName() }}</p>
-                            <a href="{{ $file->temporaryUrl() }}" target="_blank" class="inline-flex items-center px-2 py-1 bg-white text-indigo-600 rounded text-xs font-medium hover:bg-indigo-50">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                </svg>
-                                Ver
-                            </a>
-                        </div>
+                        <p class="text-xs text-indigo-100 mb-1">{{ $file->getClientOriginalName() }}</p>
                     @else
                         {{-- Vista previa de archivo no imagen --}}
                         <div class="mb-2 p-4 bg-indigo-600 rounded-lg">
-                            <div class="flex items-center gap-3 mb-2">
-                                <svg class="w-10 h-10 flex-shrink-0" fill="white" viewBox="0 0 24 24">
-                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h6v6h6v10H6z"/>
-                                </svg>
+                            <div class="flex items-center gap-3">
+                                @if($extension === 'pdf')
+                                    <svg class="w-10 h-10 flex-shrink-0 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                        <text x="7" y="16" font-size="6" fill="white" font-weight="bold">PDF</text>
+                                    </svg>
+                                @elseif(in_array($extension, ['doc', 'docx']))
+                                    <svg class="w-10 h-10 flex-shrink-0 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                    </svg>
+                                @elseif(in_array($extension, ['zip', 'rar']))
+                                    <svg class="w-10 h-10 flex-shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                    </svg>
+                                @else
+                                    <svg class="w-10 h-10 flex-shrink-0" fill="white" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h6v6h6v10H6z"/>
+                                    </svg>
+                                @endif
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium truncate">{{ $file->getClientOriginalName() }}</p>
                                     <p class="text-xs text-indigo-200">{{ strtoupper($extension) }} • {{ number_format($file->getSize() / 1024, 2) }} KB</p>
                                 </div>
                             </div>
-                            <a href="{{ $file->temporaryUrl() }}" target="_blank" class="inline-flex items-center justify-center px-3 py-2 bg-white text-indigo-600 rounded-lg text-xs font-medium hover:bg-indigo-50 w-full">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                </svg>
-                                Ver archivo
-                            </a>
                         </div>
                     @endif
 
