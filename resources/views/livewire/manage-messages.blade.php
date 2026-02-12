@@ -1,6 +1,6 @@
-<div class="p-4" wire:poll.3s>
+<div class="p-4" wire:poll.3s x-data="{ scrollToBottom() { $nextTick(() => { this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight; }); } }" x-init="scrollToBottom()" @message-sent.window="scrollToBottom()">
     {{-- Lista de mensajes --}}
-    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-4 h-96 overflow-y-auto" id="chat-box">
+    <div x-ref="chatBox" class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-4 h-96 overflow-y-auto" id="chat-box">
         @forelse($messages as $message)
             <div style="margin-bottom: 1.25rem;" class="flex items-end gap-2 {{ $message->user_id === auth()->id() ? 'justify-end' : 'justify-start' }}">
                 @if($message->user_id !== auth()->id())
@@ -23,7 +23,7 @@
     </div>
 
     {{-- Formulario para enviar --}}
-    <form wire:submit="sendMessage">
+    <form wire:submit="sendMessage" @submit="scrollToBottom()">
         <div class="flex gap-2">
             <input type="text" wire:model="content" placeholder="Escribe un mensaje..."
                 class="flex-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm @error('content') border-red-500 @enderror" />
@@ -36,3 +36,27 @@
         @enderror
     </form>
 </div>
+
+@script
+<script>
+    // Scroll automático después de actualizaciones de Livewire
+    $wire.on('message-sent', () => {
+        setTimeout(() => {
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }, 100);
+    });
+
+    // Scroll después del polling
+    Livewire.hook('morph.updated', ({ el, component }) => {
+        setTimeout(() => {
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }, 100);
+    });
+</script>
+@endscript

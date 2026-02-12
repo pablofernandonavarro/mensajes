@@ -29,6 +29,9 @@ class ManageMessages extends Component
 
         $this->reset('content');
 
+        // Disparar evento para hacer scroll
+        $this->dispatch('message-sent');
+
         // Ya no necesitamos broadcast con polling
         // broadcast(new MessageSend());
     }
