@@ -7,27 +7,42 @@ use App\Models\Message;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\WithFileUploads;
 
 class ManageMessages extends Component
 {
+    use WithFileUploads;
+
     public string $content = '';
+    public $file;
 
     public function sendMessage()
     {
         $this->validate([
             'content' => 'required|min:5|max:1000',
+            'file' => 'nullable|file|max:10240', // 10MB máximo
         ], [
             'content.required' => 'El mensaje no puede estar vacío.',
             'content.min' => 'El mensaje debe tener al menos :min caracteres.',
             'content.max' => 'El mensaje no puede superar los :max caracteres.',
+            'file.max' => 'El archivo no puede superar los 10MB.',
         ]);
 
-        Message::create([
+        $data = [
             'user_id' => auth()->id(),
             'content' => $this->content,
-        ]);
+        ];
 
-        $this->reset('content');
+        // Solo agregar campos de archivo si las columnas existen (después de migración)
+        if ($this->file && \Schema::hasColumn('messages', 'file_path')) {
+            $data['file_path'] = $this->file->store('chat-files', 'public');
+            $data['file_name'] = $this->file->getClientOriginalName();
+            $data['file_type'] = $this->file->getClientOriginalExtension();
+        }
+
+        Message::create($data);
+
+        $this->reset(['content', 'file']);
 
         // Disparar evento para hacer scroll
         $this->dispatch('message-sent');
