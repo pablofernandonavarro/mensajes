@@ -18,14 +18,14 @@ class ManageMessages extends Component
 
     public function sendMessage()
     {
-        // Validar que haya contenido O archivo
+        // Validar que haya contenido O archivo (estilo WhatsApp)
         $this->validate([
-            'content' => 'required_without:file|nullable|min:5|max:1000',
-            'file' => 'nullable|file|max:10240', // 10MB máximo
+            'content' => 'required_without:file|nullable|max:1000',
+            'file' => 'required_without:content|nullable|file|max:10240', // 10MB máximo
         ], [
             'content.required_without' => 'Debes escribir un mensaje o adjuntar un archivo.',
-            'content.min' => 'El mensaje debe tener al menos :min caracteres.',
             'content.max' => 'El mensaje no puede superar los :max caracteres.',
+            'file.required_without' => 'Debes escribir un mensaje o adjuntar un archivo.',
             'file.max' => 'El archivo no puede superar los 10MB.',
         ]);
 

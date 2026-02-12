@@ -1,6 +1,6 @@
 <div class="p-4" wire:poll.3s x-data="{ scrollToBottom() { $nextTick(() => { this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight; }); } }" x-init="scrollToBottom()" @message-sent.window="scrollToBottom()">
     {{-- Lista de mensajes --}}
-    <div x-ref="chatBox" class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-4 h-96 overflow-y-auto" id="chat-box">
+    <div x-ref="chatBox" class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-4 overflow-y-auto" style="height: calc(100vh - 280px); min-height: 500px;" id="chat-box">
         @forelse($messages as $message)
             <div style="margin-bottom: 1.25rem;" class="flex items-end gap-2 {{ $message->user_id === auth()->id() ? 'justify-end' : 'justify-start' }}">
                 @if($message->user_id !== auth()->id())
@@ -98,13 +98,7 @@
                     @if($isImage)
                         {{-- Vista previa de imagen --}}
                         <div class="mb-2 bg-white rounded-lg overflow-hidden">
-                            @try
-                                <img src="{{ $file->temporaryUrl() }}" alt="Preview" class="w-full h-auto max-h-64 object-contain">
-                            @catch(\Exception $e)
-                                <div class="p-4 text-center">
-                                    <p class="text-sm text-gray-600">No se puede previsualizar</p>
-                                </div>
-                            @endtry
+                            <img src="{{ $file->temporaryUrl() }}" alt="Preview" class="w-full h-auto max-h-64 object-contain">
                         </div>
                         <p class="text-xs text-indigo-100 mb-1">{{ $file->getClientOriginalName() }}</p>
                     @else
