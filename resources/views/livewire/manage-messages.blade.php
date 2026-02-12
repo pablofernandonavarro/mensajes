@@ -14,17 +14,40 @@
                         <div class="mt-2 p-2 rounded {{ $message->user_id === auth()->id() ? 'bg-indigo-600' : 'bg-gray-300' }}">
                             @if(in_array($message->file_type, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
                                 {{-- Mostrar imagen --}}
-                                <a href="{{ $message->getFileUrl() }}" target="_blank">
-                                    <img src="{{ $message->getFileUrl() }}" alt="{{ $message->file_name }}" class="max-w-full h-auto rounded">
+                                <a href="{{ $message->getFileUrl() }}" target="_blank" download="{{ $message->file_name }}" class="block">
+                                    <img src="{{ $message->getFileUrl() }}" alt="{{ $message->file_name }}" class="max-w-full h-auto rounded mb-2">
+                                </a>
+                                <a href="{{ $message->getFileUrl() }}" download="{{ $message->file_name }}" class="inline-flex items-center gap-2 px-3 py-2 bg-white rounded text-sm font-medium {{ $message->user_id === auth()->id() ? 'text-indigo-600 hover:bg-indigo-50' : 'text-gray-900 hover:bg-gray-100' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <span class="text-xs">Descargar {{ $message->file_name }}</span>
                                 </a>
                             @else
-                                {{-- Mostrar enlace de descarga --}}
-                                <a href="{{ $message->getFileUrl() }}" download="{{ $message->file_name }}" class="flex items-center gap-2 {{ $message->user_id === auth()->id() ? 'text-white hover:text-indigo-100' : 'text-gray-900 hover:text-gray-700' }}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <span class="text-xs">{{ $message->file_name }}</span>
-                                </a>
+                                {{-- Mostrar enlace de descarga para archivos --}}
+                                <div class="p-3 bg-white rounded-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        @if($message->file_type === 'pdf')
+                                            <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                            </svg>
+                                        @else
+                                            <svg class="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                            </svg>
+                                        @endif
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">{{ $message->file_name }}</p>
+                                            <p class="text-xs text-gray-500">{{ strtoupper($message->file_type) }}</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ $message->getFileUrl() }}" download="{{ $message->file_name }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 w-full">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                        Descargar archivo
+                                    </a>
+                                </div>
                             @endif
                         </div>
                     @endif
