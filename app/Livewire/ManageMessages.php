@@ -18,11 +18,12 @@ class ManageMessages extends Component
 
     public function sendMessage()
     {
+        // Validar que haya contenido O archivo
         $this->validate([
-            'content' => 'required|min:5|max:1000',
+            'content' => 'required_without:file|nullable|min:5|max:1000',
             'file' => 'nullable|file|max:10240', // 10MB máximo
         ], [
-            'content.required' => 'El mensaje no puede estar vacío.',
+            'content.required_without' => 'Debes escribir un mensaje o adjuntar un archivo.',
             'content.min' => 'El mensaje debe tener al menos :min caracteres.',
             'content.max' => 'El mensaje no puede superar los :max caracteres.',
             'file.max' => 'El archivo no puede superar los 10MB.',
@@ -30,7 +31,7 @@ class ManageMessages extends Component
 
         $data = [
             'user_id' => auth()->id(),
-            'content' => $this->content,
+            'content' => $this->content ?: 'Archivo adjunto',
         ];
 
         // Solo agregar campos de archivo si las columnas existen (después de migración)
